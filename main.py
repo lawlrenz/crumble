@@ -24,6 +24,8 @@ def get_entry_point(filename):
 def do_disassembly(hexdump_in, offset):
     md = Cs(CS_ARCH_X86, CS_MODE_32)  # set architecture to x86, 32 bit
     for i in md.disasm(hexdump_in, offset):
+
+        # is operation jump/function call?
         print("0x%x:\t%s\t%s" % (i.address, i.mnemonic, i.op_str))  # print linear disassembled opcodes
 
 
