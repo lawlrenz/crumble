@@ -1,9 +1,9 @@
 import hexdump  # doing hexdumps from binaries obviously
 import pefile  # easy information about PE file like entrypoint
-from capstone import *  # capstone lib for OPcodes
+import capstone   # capstone lib for OPcodes
 import Queue  # queue module for recursive attempt
 import threading  # threading module for some performance optimizations
-import json  # json is used for saving the results of the disassembler
+# import json  # json is used for saving the results of the disassembler
 
 
 def get_hexdump_from_file(filename):
@@ -24,18 +24,24 @@ def get_entry_point(filename):
     return baseofcode+entrypointoffset  # compute entrypoint
 
 
-def do_disassembly(offset):
-    if offset not in address_map:  # is offset allready visited?
-        address_map.append(offset)  # if not, mark it now as visited
-        md = Cs(CS_ARCH_X86, CS_MODE_32)  # set architecture to x86, 32 bit
-        pointer_on_string = address_to_string_pointer(offset)
-        tmp_hexdump = full_hexdump[pointer_on_string:pointer_on_string+64]  # todo: how long? 64bit is wrong obv
-        for i in md.disasm(tmp_hexdump, offset):
+def do_disassembly(offset):  # offset: begin of basic block
+    mode = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_32)  # set architecture to x86 (32 bit)
+
+    # iterate over hex until call/jmp/return ->
+    # queue all call dest/jmp dest/ret dest AND condit. branches (both dests!)
+    address_ptr = offset
+    string_ptr = address_to_string_pointer(address_ptr)
+
+    if address_ptr not in address_map:  # is address allready visited?
+        address_map.append(address_ptr)  # if not, mark now as visited
+        tmp_hexdump = full_hexdump[string_ptr:string_ptr+64]  # todo: how long? 64bit is wrong obv
+        for i in mode.disasm(tmp_hexdump, address_ptr):
             if i.mnemonic == 'js':  # todo: call and other jumps..
                 address_as_int = int(i.op_str, 0)
                 dsm_queue.put(address_as_int)  # is operation jump/function call? add address to queue!
-            else:
-                print("0x%x:\t%s\t%s\n" % (i.address, i.mnemonic, i.op_str))  # todo: save as json
+            # else:
+                # print("0x%x:\t%s\t%s\n" % (i.address, i.mnemonic, i.op_str))  # todo: save as json
+                # print(i.disp)
 
 
 def address_to_string_pointer(address):
@@ -50,7 +56,7 @@ def worker():
 
 if __name__ == '__main__':
     file_to_analyze = 'res/crackme2.exe'  # todo: as arg
-    num_threads = 4  # todo: as arg
+    num_threads = 1  # todo: as arg
 
     address_map = []  # saves allready visited control flow adresses
     dsm_queue = Queue.Queue()  # initialize disassembly queue
