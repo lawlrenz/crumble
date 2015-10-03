@@ -1,4 +1,4 @@
-import pefile  # easy information about PE file like entrypoint
+import pefile  # easy information about PE file like header information
 import capstone   # capstone lib for OPcodes
 import Queue  # queue module for "recursive" attempt
 import threading  # threading module for some performance optimizations
@@ -17,46 +17,60 @@ def get_hexdump_from_file(filename):
 
 def get_entry_point(filename):
     pe = pefile.PE(filename)
-    entrypointoffset = str(hex(pe.OPTIONAL_HEADER.AddressOfEntryPoint))
-    return remove_hexprefix(entrypointoffset)
+    entrypointoffset = pe.OPTIONAL_HEADER.AddressOfEntryPoint
+    return entrypointoffset
 
 
-def do_disassembly(address_ptr):
+def do_disassembly(address_ptr_as_int):
+    global output
+    global indirect_controlflows
+    hexdump_ptr = get_string_pointer(address_ptr_as_int)
     mode = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_32)  # set architecture to x86 (32 bit)
     # iterate over hex until call/jmp/return ->
     # queue all call dest/jmp dest/ret dest AND condit. branches (both dests!)
+    if hex(address_ptr_as_int) not in address_map:  # is address allready visited?
+        address_map.append(hex(address_ptr_as_int))  # if not, mark now as visited
+        tmp_hexdump = binascii.a2b_hex(full_hexdump[hexdump_ptr:hexdump_ptr+14])  # conv to bin
 
-    if address_ptr not in address_map:  # is address allready visited?
-        string_ptr = address_to_string_pointer(address_ptr)
+        for instruction in mode.disasm(tmp_hexdump, address_ptr_as_int):
+            address = instruction.address
+            if address == address_ptr_as_int:  # work only the first instruction found
+                mnc = instruction.mnemonic
+                # sequential_flow = ['add', 'mov', 'push', 'pop', 'aaa']
+                conditional_branch = ['jo', 'jno', 'jb', 'jnae', 'jc', 'jnb', 'jae', 'jnc', 'jz', 'je', 'jnz', 'jne',
+                                      'jbe', 'jna', 'jnbe', 'ja', 'js', 'jns', 'jp', 'jpe', 'jnp', 'jpo', 'jl', 'jnge',
+                                      'jnl', 'jge', 'jle', 'jng', 'jnle', 'jg']
+                function_call = ['call', 'callf']
+                unconditional_branch = ['jmp', 'jmpf']
+                return_instr = ['ret']
 
-        address_map.append(address_ptr)  # if not, mark now as visited
-        tmp_hexdump = binascii.a2b_hex(full_hexdump[string_ptr:string_ptr+14])  # conv to bin
-        # todo: how long? 10 byte max length?
-        hexaddr = add_hexprefix(address_ptr)
-        for instruction in mode.disasm(tmp_hexdump, hexaddr):
-            if instruction.address == hexaddr:  # save only first instruction
-                # for byte in i.bytes:
+                # for byte in instruction.bytes:
                 #    print("%x" % byte)
-                # if tmp_hexdump.find('5589e5') > 1:
-                #    mark as function start!!
-                print("0x%x:\t%s\t%s" % (instruction.address, instruction.mnemonic, instruction.op_str))  # todo: save as json
-                if instruction.mnemonic == 'js':  # todo: call and other jumps..
-                    dsm_queue.put(remove_hexprefix(instruction.op_str))  # add new entry point to queue
-                else:
-                    dsm_queue.put(address_ptr + instruction.size)  # ptr to next instruction
+                output += "0x%x:\t%s\t%s\n" % (address, mnc, instruction.op_str)  # todo: save as json
+
+                if mnc in unconditional_branch:
+                    if instruction.op_str.find('dword ptr') != -1:  # todo: other cases?
+                        indirect_controlflows += 1
+                    else:
+                        dsm_queue.put(int(instruction.op_str, 16))  # add new entry point to queue
+                elif mnc in function_call:
+                    if instruction.op_str.find('dword ptr') != -1:
+                        indirect_controlflows += 1
+                    else:
+                        dsm_queue.put(int(instruction.op_str, 16))  # add new entry point to queue
+                        dsm_queue.put(address_ptr_as_int + instruction.size)  # ptr to next instruction
+                elif mnc in conditional_branch:
+                    dsm_queue.put(int(instruction.op_str, 16))  # add new entry point to queue
+                    dsm_queue.put(address_ptr_as_int + instruction.size)  # ptr to next instruction
+
+                elif mnc in return_instr:
+                    print("")
+                else:  # sequential flow
+                    dsm_queue.put(address_ptr_as_int + instruction.size)  # ptr to next instruction
 
 
-def remove_hexprefix(hexstr):  # 0x42 -> 42
-    return int(str(hexstr)[2:len(hexstr)])
-
-
-def add_hexprefix(hexstr_without_prefix):  # 42 (int) -> int(0x42, 16)
-    tmp = '0x' + str(hexstr_without_prefix)
-    return int(tmp, 16)
-
-
-def address_to_string_pointer(address):
-    return address*2  # map entrypoint to hexstring (*2 because address is bytewise)
+def get_string_pointer(address):
+    return address*2
 
 
 def worker():
@@ -71,6 +85,16 @@ def howto():
     print("Usage: " + sys.argv[0] + " [filename] [number of threads]")
 
 
+def find_all(a_str, sub):
+    start = 0
+    while True:
+        start = a_str.find(sub, start)
+        if start == -1:
+            return
+        yield hex(start/2)
+        start += len(sub)  # use start += 1 to find overlapping matches
+
+
 if __name__ == "__main__":
     if len(sys.argv) != 3:
         howto()
@@ -78,6 +102,10 @@ if __name__ == "__main__":
         file_to_analyze = sys.argv[1]
         num_threads = sys.argv[2]
         address_map = []  # saves allready visited adresses
+        basic_blocks = []  # basicblockadresses
+        indirect_controlflows = 0
+        output = ""
+
         dsm_queue = Queue.Queue()  # initialize disassembly queue
 
         for i in range(int(num_threads)):
@@ -86,10 +114,18 @@ if __name__ == "__main__":
             t.start()
 
         full_hexdump = get_hexdump_from_file(file_to_analyze)  # dump_crackme2 file
-
         first_entry_point = get_entry_point(file_to_analyze)  # find a starting point..
-        print("\nStarting disassembyl..\n")
+        print("\nStarting disassembly..\n")
+
+        print(len(full_hexdump))
+        print(list(find_all(full_hexdump, "5589e5")))
+
         dsm_queue.put(first_entry_point)  # ..and put it in the queue
         dsm_queue.join()  # wait for all jobs to finish
         # print(address_map)
-        print("\nSuccessfully disassembled " + str(len(address_map)) + " adresses.")
+        print("Successfully disassembled " + str(len(address_map)) + " adresses.")
+        # print(sorted(address_map))
+        print("Indirectcontrolflows (not analyzed!): " + str(indirect_controlflows))
+
+        print("\n")
+        # print(output)
