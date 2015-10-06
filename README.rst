@@ -6,7 +6,7 @@ The results are far away from perfect, as well as the output ist not working so 
 
 Installation
 ------------
-You can install this tool with ``$ python setup.py install``.
+You can install this tool with ``$ pip install .``.
 
 Usage
 -----

@@ -3,13 +3,13 @@
 from distutils.core import setup
 
 setup(
-    name="downbreaker-runner.py",
-    version="1.0",
+    name="downbreaker",
+    version="0.1",
     author="Lorenz Heiler",
     author_email="contact@lorenzheiler.com",
     url="www.lorenzheiler.com",
 
-    description="Recursive Traversal x86 Disassembler for PE files. ",
+    description="Recursive Disassembler for PE files (x86) ",
     long_description="",
     classifiers="",
 

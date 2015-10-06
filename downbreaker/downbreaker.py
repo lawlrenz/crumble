@@ -27,15 +27,14 @@ def do_disassembly(address_ptr_as_int, dsm_queue, address_map, full_hexdump):
     indirect_controlflows = 0
     hexdump_ptr = get_string_pointer(address_ptr_as_int)
     mode = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_32)  # set architecture to x86 (32 bit)
-    # iterate over hex until call/jmp/return ->
-    # queue all call dest/jmp dest/ret dest AND condit. branches (both dests!)
+
     if hex(address_ptr_as_int) not in address_map:  # is address allready visited?
         address_map.append(hex(address_ptr_as_int))  # if not, mark now as visited
-        tmp_hexdump = binascii.a2b_hex(full_hexdump[hexdump_ptr:hexdump_ptr+14])  # conv to bin
+        tmp_hexdump = binascii.a2b_hex(full_hexdump[hexdump_ptr:hexdump_ptr+14])
 
         for instruction in mode.disasm(tmp_hexdump, address_ptr_as_int):
             address = instruction.address
-            if address == address_ptr_as_int:  # work only the first instruction found
+            if address == address_ptr_as_int:  # process only the first instruction found
                 mnc = instruction.mnemonic
                 # sequential_flow = ['add', 'mov', 'push', 'pop', 'aaa']
                 conditional_branch = ['jo', 'jno', 'jb', 'jnae', 'jc', 'jnb', 'jae', 'jnc', 'jz', 'je', 'jnz', 'jne',
@@ -102,7 +101,7 @@ def main():
     else:
         file_to_analyze = sys.argv[1]
         num_threads = sys.argv[2]
-        address_map = []  # saves allready visited adresses
+        address_map = []  # saves already visited adresses
         indirect_controlflows = 0
 
         dsm_queue = Queue.Queue()  # initialize disassembly queue
