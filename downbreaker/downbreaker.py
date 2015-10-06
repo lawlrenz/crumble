@@ -17,16 +17,25 @@ def get_hexdump_from_file(filename):
     return filedump
 
 
-def get_entry_point(filename):
+def get_entry_point(filename):  # todo: where to start..?
     pe = pefile.PE(filename)
     entrypointoffset = pe.OPTIONAL_HEADER.AddressOfEntryPoint
+    # baseofcode = pe.OPTIONAL_HEADER.BaseOfCode
+    # sizeofheaders = pe.OPTIONAL_HEADER.SizeOfHeaders
     return entrypointoffset
 
 
-def do_disassembly(address_ptr_as_int, dsm_queue, address_map, full_hexdump, beginofbasicblock=False):
-    if beginofbasicblock:
-        print '====== %s ======\n' % hex(address_ptr_as_int)
+def do_disassembly(address_ptr_as_int, dsm_queue, address_map, full_hexdump):
+    # if beginofbasicblock:
+    #    print '====== block at %s ======\n' % hex(address_ptr_as_int)
     indirect_controlflows = 0  # not used yet
+
+    conditional_branch = ['jo', 'jno', 'jb', 'jnae', 'jc', 'jnb', 'jae', 'jnc', 'jz', 'je', 'jnz',
+                          'jne', 'jbe', 'jna', 'jnbe', 'ja', 'js', 'jns', 'jp', 'jpe', 'jnp', 'jpo',
+                          'jl', 'jnge', 'jnl', 'jge', 'jle', 'jng', 'jnle', 'jg']
+    function_call = ['call', 'callf']
+    unconditional_branch = ['jmp', 'jmpf']
+    return_instr = ['ret']
 
     hexdump_ptr = get_string_pointer(address_ptr_as_int)
     mode = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_32)  # set architecture to x86 (32 bit)
@@ -34,56 +43,46 @@ def do_disassembly(address_ptr_as_int, dsm_queue, address_map, full_hexdump, beg
     if hex(address_ptr_as_int) not in address_map:  # is address already visited?
         address_map.append(hex(address_ptr_as_int))  # if not, mark now as visited
 
-        tmp_hexdump = binascii.a2b_hex(full_hexdump[hexdump_ptr:hexdump_ptr+14])
+        inbasicblock = True
+        while inbasicblock:
+            tmp_hexdump = binascii.a2b_hex(full_hexdump[hexdump_ptr:hexdump_ptr+get_string_pointer(7)])
+            if len(list(mode.disasm(tmp_hexdump, address_ptr_as_int))) == 0:
+                inbasicblock = False
+            else:
+                for instruction in mode.disasm(tmp_hexdump, address_ptr_as_int):
+                    if instruction.address == address_ptr_as_int:  # process only the first instruction found
+                        if instruction.mnemonic in unconditional_branch:
+                            print('Unconditional branch')
+                            inbasicblock = False
+                            if instruction.op_str.find('dword ptr') != -1:
+                                indirect_controlflows += 1
+                            elif instruction.op_str.find('0x') == -1:
+                                indirect_controlflows += 1
+                            else:
+                                dsm_queue.put(int(instruction.op_str, 16))  # add new entry point to queue
 
-        cdecl = 0
-        for instruction in mode.disasm(tmp_hexdump, address_ptr_as_int):
-            mnc = instruction.mnemonic
-            address = instruction.address
+                        elif instruction.mnemonic in function_call:
+                            print('Func call')
+                            hexdump_ptr += get_string_pointer(instruction.size)
+                            if instruction.op_str.find('dword ptr') != -1:
+                                indirect_controlflows += 1
+                            elif instruction.op_str.find('0x') == -1:
+                                indirect_controlflows += 1
+                            else:
+                                dsm_queue.put(int(instruction.op_str, 16))  # add new entry point to queue
 
-            if mnc == 'push' and instruction.op_str == 'ebp':  # check for cdecl
-                cdecl += 1
-            elif mnc == 'mov' and instruction.op_str == 'ebp, esp':
-                cdecl += 1
+                        elif instruction.mnemonic in conditional_branch:
+                            print('Conditional branch')
+                            dsm_queue.put(int(instruction.op_str, 16))  # add new entry point to queue
+                            hexdump_ptr += get_string_pointer(instruction.size)
 
-            if cdecl == 2:
-                print('\n\n#### start of function ####')
-                cdecl = 0
-
-            if address == address_ptr_as_int:  # process only the first instruction found
-                conditional_branch = ['jo', 'jno', 'jb', 'jnae', 'jc', 'jnb', 'jae', 'jnc', 'jz', 'je', 'jnz',
-                                      'jne', 'jbe', 'jna', 'jnbe', 'ja', 'js', 'jns', 'jp', 'jpe', 'jnp', 'jpo',
-                                      'jl', 'jnge', 'jnl', 'jge', 'jle', 'jng', 'jnle', 'jg']
-                function_call = ['call', 'callf']
-                unconditional_branch = ['jmp', 'jmpf']
-                return_instr = ['ret']
-
-                # for byte in instruction.bytes:
-                #    print("%x" % byte)
-                print "0x%x:\t%s\t%s" % (address, mnc, instruction.op_str)
-
-                if mnc in unconditional_branch:
-                    if instruction.op_str.find('dword ptr') != -1:
-                        indirect_controlflows += 1
-                    else:
-                        dsm_queue.put(int(instruction.op_str, 16))  # add new entry point to queue
-
-                elif mnc in function_call:
-                    if instruction.op_str.find('dword ptr') != -1:
-                        indirect_controlflows += 1
-                    else:
-                        dsm_queue.put(int(instruction.op_str, 16))  # add new entry point to queue
-                        dsm_queue.put(address_ptr_as_int + instruction.size)  # ptr to next instruction
-
-                elif mnc in conditional_branch:
-                    dsm_queue.put(int(instruction.op_str, 16))  # add new entry point to queue
-                    dsm_queue.put(address_ptr_as_int + instruction.size)  # ptr to next instruction
-
-                elif mnc in return_instr:
-                    print('#### end of function ####\n\n')
-
-                else:  # sequential flow todo: not recursive...
-                    do_disassembly(address_ptr_as_int + instruction.size, dsm_queue, address_map, full_hexdump)
+                        elif instruction.mnemonic in return_instr:
+                            print('Return Instruction')
+                            inbasicblock = False
+                        else:  # sequential flow
+                            print('Sequential flow')
+                            hexdump_ptr += get_string_pointer(instruction.size)
+                        print "%s\t%s" % (instruction.mnemonic, instruction.op_str)
 
 
 def get_string_pointer(address):
@@ -93,7 +92,7 @@ def get_string_pointer(address):
 def worker(dsm_queue, address_map, full_hexdump):
     while True:
         entry_point = dsm_queue.get()
-        do_disassembly(entry_point, dsm_queue, address_map, full_hexdump, beginofbasicblock=True)
+        do_disassembly(entry_point, dsm_queue, address_map, full_hexdump)
         dsm_queue.task_done()
 
 
