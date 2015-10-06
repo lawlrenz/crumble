@@ -1,6 +1,7 @@
 Recursive Disassembler with Python
 ==================================
 
-Additional Libs (pypi):
-* pefile
-* capstone
+Additional Libaries (pypi)
+--------------------------
+    * pefile
+    * capstone
