@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import pefile  # easy information about PE file like header information
 import capstone   # capstone lib for OPcodes
 import Queue  # queue module for "recursive" attempt
@@ -21,9 +23,8 @@ def get_entry_point(filename):
     return entrypointoffset
 
 
-def do_disassembly(address_ptr_as_int):
-    global output
-    global indirect_controlflows
+def do_disassembly(address_ptr_as_int, dsm_queue, address_map, full_hexdump):
+    indirect_controlflows = 0
     hexdump_ptr = get_string_pointer(address_ptr_as_int)
     mode = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_32)  # set architecture to x86 (32 bit)
     # iterate over hex until call/jmp/return ->
@@ -46,7 +47,7 @@ def do_disassembly(address_ptr_as_int):
 
                 # for byte in instruction.bytes:
                 #    print("%x" % byte)
-                output += "0x%x:\t%s\t%s\n" % (address, mnc, instruction.op_str)  # todo: save as json
+                # output += "0x%x:\t%s\t%s\n" % (address, mnc, instruction.op_str)  # todo: save as json
 
                 if mnc in unconditional_branch:
                     if instruction.op_str.find('dword ptr') != -1:  # todo: other cases?
@@ -73,16 +74,11 @@ def get_string_pointer(address):
     return address*2
 
 
-def worker():
+def worker(dsm_queue, address_map, full_hexdump):
     while True:
         entry_point = dsm_queue.get()
-        do_disassembly(entry_point)
+        do_disassembly(entry_point, dsm_queue, address_map, full_hexdump)
         dsm_queue.task_done()
-
-
-def howto():
-    print("%s Version %s\n" % ("Recursive Dissassembler", "0.1"))
-    print("Usage: " + sys.argv[0] + " [filename] [number of threads]")
 
 
 def find_all(a_str, sub):
@@ -95,7 +91,12 @@ def find_all(a_str, sub):
         start += len(sub)  # use start += 1 to find overlapping matches
 
 
-if __name__ == "__main__":
+def howto():
+    print("%s Version %s\n" % ("Recursive Dissassembler", "0.1"))
+    print("Usage: " + sys.argv[0] + " [filename] [number of threads]")
+
+
+def main():
     if len(sys.argv) != 3:
         howto()
     else:
@@ -108,12 +109,13 @@ if __name__ == "__main__":
 
         dsm_queue = Queue.Queue()  # initialize disassembly queue
 
+        full_hexdump = get_hexdump_from_file(file_to_analyze)  # dump_crackme2 file
+
         for i in range(int(num_threads)):
-            t = threading.Thread(target=worker)
+            t = threading.Thread(target=worker, args=(dsm_queue, address_map, full_hexdump))
             t.daemon = True
             t.start()
 
-        full_hexdump = get_hexdump_from_file(file_to_analyze)  # dump_crackme2 file
         first_entry_point = get_entry_point(file_to_analyze)  # find a starting point..
         print("\nStarting disassembly..\n")
 
