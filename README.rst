@@ -2,7 +2,7 @@ Recursive Disassembler (x86)
 ============================
 This is a crossplatform commandline tool, written in Python, which can disassemble 32bit PE files and save the results as a .json file.
 
-The results are not yet perfect, as well as the output ist not working so far.
+The results are far away from perfect, as well as the output ist not working so far.
 
 Installation
 ------------
