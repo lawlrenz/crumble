@@ -10,7 +10,7 @@ You can install this tool with ``$ pip install .``.
 
 Usage
 -----
-After installation you can run ``$ downbreaker yourpefile.exe numberofthreads``.
+After installation you can run ``$ downbreaker yourpefile.exe numberofthreads``. I recommend 1 thread at the moment.
 
 Additional Libaries used (pypi)
 -------------------------------
