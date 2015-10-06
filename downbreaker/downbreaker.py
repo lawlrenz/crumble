@@ -47,10 +47,10 @@ def do_disassembly(address_ptr_as_int, dsm_queue, address_map, full_hexdump):
 
                 # for byte in instruction.bytes:
                 #    print("%x" % byte)
-                # output += "0x%x:\t%s\t%s\n" % (address, mnc, instruction.op_str)  # todo: save as json
+                # output += "0x%x:\t%s\t%s\n" % (address, mnc, instruction.op_str)
 
                 if mnc in unconditional_branch:
-                    if instruction.op_str.find('dword ptr') != -1:  # todo: other cases?
+                    if instruction.op_str.find('dword ptr') != -1:
                         indirect_controlflows += 1
                     else:
                         dsm_queue.put(int(instruction.op_str, 16))  # add new entry point to queue
@@ -103,9 +103,7 @@ def main():
         file_to_analyze = sys.argv[1]
         num_threads = sys.argv[2]
         address_map = []  # saves allready visited adresses
-        basic_blocks = []  # basicblockadresses
         indirect_controlflows = 0
-        output = ""
 
         dsm_queue = Queue.Queue()  # initialize disassembly queue
 

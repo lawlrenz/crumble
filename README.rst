@@ -1,5 +1,5 @@
-Recursive Traversal Disassembler with Python
-=============================
+Recursive Disassembler with Python
+==================================
 
 Additional Libs (pypi):
 * pefile
