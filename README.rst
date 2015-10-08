@@ -15,7 +15,7 @@ Usage
 -----
 After installation you can run ``$ downbreaker yourpefile.exe numberofthreads``. I recommend 1 thread at the moment, because of Terminaloutput.
 
-Additional Libaries used (pypi)
+Additional Libraries used (pypi)
 -------------------------------
 * `Capstone <http://www.capstone-engine.org/>`_
 * `pefile  <https://pypi.python.org/pypi/pefile>`_
