@@ -6,7 +6,7 @@ import Queue  # queue module for "recursive" attempt
 import threading  # threading module for some performance optimizations
 import binascii  # using for hexdump
 import sys
-# import json  # json is used for saving the results of the disassembly
+import json  # json is used for saving the results of the disassembly
 
 
 def get_hexdump_and_entrypoint_from_file(filename):
@@ -31,12 +31,13 @@ def do_disassembly(address_ptr, dsm_queue, address_map, full_hexdump):
 
     inbasicblock = True
     startmsg = False
+    basicblock = []
     if hex(address_ptr) not in address_map:
         address_map.append(hex(address_ptr))  # mark address as visited
 
         while inbasicblock:
             if not startmsg:
-                print("### BEGIN OF BASICBLOCK ###")
+                # print("### BEGIN OF BASICBLOCK ###")
                 startmsg = True
 
             buff = binascii.a2b_hex(full_hexdump[get_string_pointer(address_ptr):get_string_pointer(address_ptr + 7)])
@@ -75,14 +76,18 @@ def do_disassembly(address_ptr, dsm_queue, address_map, full_hexdump):
                         elif instruction.mnemonic in return_instr:
                             # print('Return Instruction')
                             inbasicblock = False
-                        else:  # sequential flow
+                        else:
                             # print('Sequential flow')
                             address_ptr += instruction.size
-                        byteseq = binascii.b2a_hex(instruction.bytes)
-                        byteseq = " ".join(byteseq[i:i+2] for i in range(0, len(byteseq), 2))
-                        print "0x%x:\t%s\n\t%s\t%s" % (instruction.address, byteseq, instruction.mnemonic, instruction.op_str)
-            if not inbasicblock:
-                print("### END OF BASICBLOCK ###")
+                        # byteseq = binascii.b2a_hex(instruction.bytes)
+                        # byteseq = " ".join(byteseq[i:i+2] for i in range(0, len(byteseq), 2))
+                        # print "0x%x:\t%s\n\t%s\t%s" \
+                        #      % (instruction.address, byteseq, instruction.mnemonic, instruction.op_str)
+                        disassembled = instruction.mnemonic + ' ' + instruction.op_str
+                        basicblock.append(disassembled)
+            # if not inbasicblock:
+            #    print("### END OF BASICBLOCK ###")
+        print(json.dumps({'basicblock': basicblock}))  # testing
 
 
 def get_string_pointer(address):
@@ -103,7 +108,7 @@ def find_all(a_str, sub):
         if start == -1:
             return
         yield hex(start/2)
-        start += len(sub)  # use start += 1 to find overlapping matches
+        start += len(sub)
 
 
 def howto():
