@@ -20,9 +20,9 @@ def get_hexdump_from_file(filename):
 def get_entry_point(filename):  # todo: where to start..?
     pe = pefile.PE(filename)
     entrypointoffset = pe.OPTIONAL_HEADER.AddressOfEntryPoint
-    # baseofcode = pe.OPTIONAL_HEADER.BaseOfCode
-    # sizeofheaders = pe.OPTIONAL_HEADER.SizeOfHeaders
-    return entrypointoffset
+    baseofcode = pe.OPTIONAL_HEADER.BaseOfCode
+    sizeofheaders = pe.OPTIONAL_HEADER.SizeOfHeaders
+    return entrypointoffset-baseofcode+sizeofheaders
 
 
 def do_disassembly(address_ptr, dsm_queue, address_map, full_hexdump):
@@ -40,11 +40,14 @@ def do_disassembly(address_ptr, dsm_queue, address_map, full_hexdump):
     mode = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_32)  # set architecture to x86 (32 bit)
 
     inbasicblock = True
-    while inbasicblock:
-        if hex(address_ptr) in address_map:
-            inbasicblock = False
-        else:
-            address_map.append(hex(address_ptr))  # mark address as visited
+    startmsg = False
+    if hex(address_ptr) not in address_map:
+        address_map.append(hex(address_ptr))  # mark address as visited
+
+        while inbasicblock:
+            if not startmsg:
+                print("### BEGIN OF BASICBLOCK ###")
+                startmsg = True
 
             tmp_hexdump = binascii.a2b_hex(full_hexdump[get_string_pointer(address_ptr):get_string_pointer(address_ptr + 7)])
             if len(list(mode.disasm(tmp_hexdump, address_ptr))) == 0:  # check if end of instructions
@@ -54,7 +57,7 @@ def do_disassembly(address_ptr, dsm_queue, address_map, full_hexdump):
                 for instruction in mode.disasm(tmp_hexdump, address_ptr):
                     if instruction.address == address_ptr_first_instruction:  # process only the first instruction found
                         if instruction.mnemonic in unconditional_branch:
-                            print('Unconditional branch')
+                            # print('Unconditional branch')
                             inbasicblock = False
                             if instruction.op_str.find('dword ptr') != -1:
                                 indirect_controlflows += 1
@@ -64,7 +67,7 @@ def do_disassembly(address_ptr, dsm_queue, address_map, full_hexdump):
                                 dsm_queue.put(int(instruction.op_str, 16))  # add new entry point to queue
 
                         elif instruction.mnemonic in function_call:
-                            print('Func call')
+                            # print('Func call')
                             address_ptr += instruction.size
                             if instruction.op_str.find('dword ptr') != -1:
                                 indirect_controlflows += 1
@@ -75,16 +78,21 @@ def do_disassembly(address_ptr, dsm_queue, address_map, full_hexdump):
 
                         elif instruction.mnemonic in conditional_branch:
                             # print('Conditional branch')
+                            inbasicblock = False
+                            dsm_queue.put(address_ptr + instruction.size)  # add new entry point to queue
                             dsm_queue.put(int(instruction.op_str, 16))  # add new entry point to queue
-                            address_ptr += instruction.size
 
                         elif instruction.mnemonic in return_instr:
-                            print('Return Instruction')
+                            # print('Return Instruction')
                             inbasicblock = False
                         else:  # sequential flow
                             # print('Sequential flow')
                             address_ptr += instruction.size
-                        print "Adress: %s\tInstructionsize: %i\tMnemonic: %s\tOpcode: %s" % (hex(address_ptr), instruction.size, instruction.mnemonic, instruction.op_str)
+                        byteseq = binascii.b2a_hex(instruction.bytes)
+                        byteseq = " ".join(byteseq[i:i+2] for i in range(0, len(byteseq), 2))
+                        print "0x%x:\t%s\n\t%s\t%s" % (instruction.address, byteseq, instruction.mnemonic, instruction.op_str)
+            if not inbasicblock:
+                print("### END OF BASICBLOCK ###")
 
 
 def get_string_pointer(address):
@@ -122,7 +130,6 @@ def main():
         address_map = []  # saves already visited adresses
 
         dsm_queue = Queue.Queue()  # initialize disassembly queue
-
         full_hexdump = get_hexdump_from_file(file_to_analyze)  # dump_crackme2 file
 
         for i in range(int(num_threads)):
@@ -138,8 +145,9 @@ def main():
 
         dsm_queue.put(first_entry_point)  # ..and put it in the queue
         dsm_queue.join()  # wait for all jobs to finish
+
         # print(address_map)
-        print("Successfully disassembled " + str(len(address_map)) + " adresses.")
+        print("Successfully disassembled " + str(len(address_map)) + " Basicblocks.")
         # print(sorted(address_map))
         # print("Indirectcontrolflows (not analyzed!): " + str(indirect_controlflows))
 
