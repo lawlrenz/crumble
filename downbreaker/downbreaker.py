@@ -25,7 +25,7 @@ def get_entry_point(filename):  # todo: where to start..?
     return entrypointoffset
 
 
-def do_disassembly(address_ptr_as_int, dsm_queue, address_map, full_hexdump):
+def do_disassembly(address_ptr, dsm_queue, address_map, full_hexdump):
     # if beginofbasicblock:
     #    print '====== block at %s ======\n' % hex(address_ptr_as_int)
     indirect_controlflows = 0  # not used yet
@@ -37,20 +37,22 @@ def do_disassembly(address_ptr_as_int, dsm_queue, address_map, full_hexdump):
     unconditional_branch = ['jmp', 'jmpf']
     return_instr = ['ret']
 
-    hexdump_ptr = get_string_pointer(address_ptr_as_int)
     mode = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_32)  # set architecture to x86 (32 bit)
 
-    if hex(address_ptr_as_int) not in address_map:  # is address already visited?
-        address_map.append(hex(address_ptr_as_int))  # if not, mark now as visited
+    inbasicblock = True
+    while inbasicblock:
+        if hex(address_ptr) in address_map:
+            inbasicblock = False
+        else:
+            address_map.append(hex(address_ptr))  # mark address as visited
 
-        inbasicblock = True
-        while inbasicblock:
-            tmp_hexdump = binascii.a2b_hex(full_hexdump[hexdump_ptr:hexdump_ptr+get_string_pointer(7)])
-            if len(list(mode.disasm(tmp_hexdump, address_ptr_as_int))) == 0:
+            tmp_hexdump = binascii.a2b_hex(full_hexdump[get_string_pointer(address_ptr):get_string_pointer(address_ptr + 7)])
+            if len(list(mode.disasm(tmp_hexdump, address_ptr))) == 0:  # check if end of instructions
                 inbasicblock = False
             else:
-                for instruction in mode.disasm(tmp_hexdump, address_ptr_as_int):
-                    if instruction.address == address_ptr_as_int:  # process only the first instruction found
+                address_ptr_first_instruction = address_ptr
+                for instruction in mode.disasm(tmp_hexdump, address_ptr):
+                    if instruction.address == address_ptr_first_instruction:  # process only the first instruction found
                         if instruction.mnemonic in unconditional_branch:
                             print('Unconditional branch')
                             inbasicblock = False
@@ -63,7 +65,7 @@ def do_disassembly(address_ptr_as_int, dsm_queue, address_map, full_hexdump):
 
                         elif instruction.mnemonic in function_call:
                             print('Func call')
-                            hexdump_ptr += get_string_pointer(instruction.size)
+                            address_ptr += instruction.size
                             if instruction.op_str.find('dword ptr') != -1:
                                 indirect_controlflows += 1
                             elif instruction.op_str.find('0x') == -1:
@@ -72,17 +74,17 @@ def do_disassembly(address_ptr_as_int, dsm_queue, address_map, full_hexdump):
                                 dsm_queue.put(int(instruction.op_str, 16))  # add new entry point to queue
 
                         elif instruction.mnemonic in conditional_branch:
-                            print('Conditional branch')
+                            # print('Conditional branch')
                             dsm_queue.put(int(instruction.op_str, 16))  # add new entry point to queue
-                            hexdump_ptr += get_string_pointer(instruction.size)
+                            address_ptr += instruction.size
 
                         elif instruction.mnemonic in return_instr:
                             print('Return Instruction')
                             inbasicblock = False
                         else:  # sequential flow
-                            print('Sequential flow')
-                            hexdump_ptr += get_string_pointer(instruction.size)
-                        print "%s\t%s" % (instruction.mnemonic, instruction.op_str)
+                            # print('Sequential flow')
+                            address_ptr += instruction.size
+                        print "Adress: %s\tInstructionsize: %i\tMnemonic: %s\tOpcode: %s" % (hex(address_ptr), instruction.size, instruction.mnemonic, instruction.op_str)
 
 
 def get_string_pointer(address):
