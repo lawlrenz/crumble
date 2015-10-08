@@ -17,5 +17,5 @@ After installation you can run ``$ downbreaker yourpefile.exe numberofthreads``.
 
 Additional Libaries used (pypi)
 -------------------------------
-* pefile
-* capstone
+* `Capstone <http://www.capstone-engine.org/>`_
+* `pefile  <https://pypi.python.org/pypi/pefile>`_
