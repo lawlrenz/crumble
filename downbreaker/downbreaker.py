@@ -9,25 +9,15 @@ import sys
 # import json  # json is used for saving the results of the disassembly
 
 
-def get_hexdump_from_file(filename):
-    filehandle = open(filename)  # open binary for disassembly
-    filecontent = filehandle.read()
-    filehandle.close()
-    filedump = binascii.hexlify(filecontent)
-    return filedump
-
-
-def get_entry_point(filename):  # todo: where to start..?
-    pe = pefile.PE(filename)
-    entrypointoffset = pe.OPTIONAL_HEADER.AddressOfEntryPoint
-    baseofcode = pe.OPTIONAL_HEADER.BaseOfCode
-    sizeofheaders = pe.OPTIONAL_HEADER.SizeOfHeaders
-    return entrypointoffset-baseofcode+sizeofheaders
+def get_hexdump_and_entrypoint_from_file(filename):
+    try:
+        pe = pefile.PE(filename)
+    except OSError:
+        sys.exit('The file: ' + filename + ' could not be found.')
+    return binascii.b2a_hex(pe.get_memory_mapped_image()), pe.OPTIONAL_HEADER.AddressOfEntryPoint
 
 
 def do_disassembly(address_ptr, dsm_queue, address_map, full_hexdump):
-    # if beginofbasicblock:
-    #    print '====== block at %s ======\n' % hex(address_ptr_as_int)
     indirect_controlflows = 0  # not used yet
 
     conditional_branch = ['jo', 'jno', 'jb', 'jnae', 'jc', 'jnb', 'jae', 'jnc', 'jz', 'je', 'jnz',
@@ -49,12 +39,12 @@ def do_disassembly(address_ptr, dsm_queue, address_map, full_hexdump):
                 print("### BEGIN OF BASICBLOCK ###")
                 startmsg = True
 
-            tmp_hexdump = binascii.a2b_hex(full_hexdump[get_string_pointer(address_ptr):get_string_pointer(address_ptr + 7)])
-            if len(list(mode.disasm(tmp_hexdump, address_ptr))) == 0:  # check if end of instructions
+            buff = binascii.a2b_hex(full_hexdump[get_string_pointer(address_ptr):get_string_pointer(address_ptr + 7)])
+            if len(list(mode.disasm(buff, address_ptr))) == 0:  # check if end of instructions
                 inbasicblock = False
             else:
                 address_ptr_first_instruction = address_ptr
-                for instruction in mode.disasm(tmp_hexdump, address_ptr):
+                for instruction in mode.disasm(buff, address_ptr):
                     if instruction.address == address_ptr_first_instruction:  # process only the first instruction found
                         if instruction.mnemonic in unconditional_branch:
                             # print('Unconditional branch')
@@ -130,26 +120,20 @@ def main():
         address_map = []  # saves already visited adresses
 
         dsm_queue = Queue.Queue()  # initialize disassembly queue
-        full_hexdump = get_hexdump_from_file(file_to_analyze)  # dump_crackme2 file
+        full_hexdump, first_entry_point = get_hexdump_and_entrypoint_from_file(file_to_analyze)
 
         for i in range(int(num_threads)):
             t = threading.Thread(target=worker, args=(dsm_queue, address_map, full_hexdump))
             t.daemon = True
             t.start()
 
-        first_entry_point = get_entry_point(file_to_analyze)  # find a starting point..
         print("\nStarting disassembly..\n")
 
         # print(list(find_all(full_hexdump, "5589e5")))
         # print(list(find_all(full_hexdump, "c2")))
 
-        dsm_queue.put(first_entry_point)  # ..and put it in the queue
+        dsm_queue.put(first_entry_point)
         dsm_queue.join()  # wait for all jobs to finish
 
         # print(address_map)
         print("Successfully disassembled " + str(len(address_map)) + " Basicblocks.")
-        # print(sorted(address_map))
-        # print("Indirectcontrolflows (not analyzed!): " + str(indirect_controlflows))
-
-        # print("\n")
-        # print(output)
