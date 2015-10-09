@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 
-import pefile  # easy information about PE file like header information
-import capstone   # capstone lib for OPcodes
-import Queue  # queue module for "recursive" attempt
-import threading  # threading module for some performance optimizations
-import binascii  # using for hexdump
-import sys
-import json  # json is used for saving the results of the disassembly
+try:
+    import pefile  # easy information about PE file like header information
+    import capstone   # capstone lib for OPcodes
+    import Queue  # queue module for "recursive" attempt
+    import threading  # threading module for some performance optimizations
+    import binascii  # using for hexdump
+    import sys
+    import json  # json is used for saving the results of the disassembly
+except ImportError:
+    sys.exit('Missing depencies, please check readme.')
 
 
 def get_hexdump_and_entrypoint_from_file(filename):
@@ -26,11 +29,14 @@ def do_disassembly(address_ptr, dsm_queue, address_map, full_hexdump):
     function_call = ['call', 'callf']
     unconditional_branch = ['jmp', 'jmpf']
     return_instr = ['ret']
+    leave_instr = ['leave']
 
     mode = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_32)  # set architecture to x86 (32 bit)
 
     inbasicblock = True
     startmsg = False
+    startaddr = 0
+    basicblocklen = 0
     basicblock = []
     if hex(address_ptr) not in address_map:
         address_map.append(hex(address_ptr))  # mark address as visited
@@ -39,6 +45,7 @@ def do_disassembly(address_ptr, dsm_queue, address_map, full_hexdump):
             if not startmsg:
                 # print("### BEGIN OF BASICBLOCK ###")
                 startmsg = True
+                startaddr = address_ptr
 
             buff = binascii.a2b_hex(full_hexdump[get_string_pointer(address_ptr):get_string_pointer(address_ptr + 7)])
             if len(list(mode.disasm(buff, address_ptr))) == 0:  # check if end of instructions
@@ -47,6 +54,15 @@ def do_disassembly(address_ptr, dsm_queue, address_map, full_hexdump):
                 address_ptr_first_instruction = address_ptr
                 for instruction in mode.disasm(buff, address_ptr):
                     if instruction.address == address_ptr_first_instruction:  # process only the first instruction found
+
+                        basicblocklen += 1
+
+                        disassembled = instruction.mnemonic + ' ' + instruction.op_str
+                        basicblock.append(disassembled)
+                        # if basicblocklen > 1:
+                        #    if basicblock[basicblocklen-2] == "push ebp" and basicblock[basicblocklen-1] == "mov ebp, esp":
+                        #        print("Function entry")
+
                         if instruction.mnemonic in unconditional_branch:
                             # print('Unconditional branch')
                             inbasicblock = False
@@ -75,6 +91,8 @@ def do_disassembly(address_ptr, dsm_queue, address_map, full_hexdump):
 
                         elif instruction.mnemonic in return_instr:
                             # print('Return Instruction')
+                            # if basicblock[basicblocklen-2] == "mov esp, ebp" and basicblock[basicblocklen-1] == "pop ebp" or basicblock[basicblocklen-2] in leave_instr:
+                            # print("Function leave")  # todo: more exitpoints than entrypoints possible!
                             inbasicblock = False
                         else:
                             # print('Sequential flow')
@@ -83,11 +101,10 @@ def do_disassembly(address_ptr, dsm_queue, address_map, full_hexdump):
                         # byteseq = " ".join(byteseq[i:i+2] for i in range(0, len(byteseq), 2))
                         # print "0x%x:\t%s\n\t%s\t%s" \
                         #      % (instruction.address, byteseq, instruction.mnemonic, instruction.op_str)
-                        disassembled = instruction.mnemonic + ' ' + instruction.op_str
-                        basicblock.append(disassembled)
+
             # if not inbasicblock:
             #    print("### END OF BASICBLOCK ###")
-        print(json.dumps({'basicblock': basicblock}))  # testing
+        print(json.dumps({'loc_' + hex(startaddr): basicblock},  indent=2))  # testing
 
 
 def get_string_pointer(address):
@@ -107,7 +124,7 @@ def find_all(a_str, sub):
         start = a_str.find(sub, start)
         if start == -1:
             return
-        yield hex(start/2)
+        yield start/2
         start += len(sub)
 
 
@@ -134,10 +151,10 @@ def main():
 
         print("\nStarting disassembly..\n")
 
-        # print(list(find_all(full_hexdump, "5589e5")))
-        # print(list(find_all(full_hexdump, "c2")))
-
         dsm_queue.put(first_entry_point)
+        for entrypoint in list(find_all(full_hexdump, "5589e5")):
+            dsm_queue.put(entrypoint)
+
         dsm_queue.join()  # wait for all jobs to finish
 
         # print(address_map)
