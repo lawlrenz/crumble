@@ -2,13 +2,15 @@
 
 try:
     import pefile  # easy information about PE file like header information
-    import capstone   # capstone lib for OPcodes
+    import capstone  # capstone lib for OPcodes
     import Queue  # queue module for "recursive" attempt
     import threading  # threading module for some performance optimizations
     import binascii  # using for hexdump
     import sys
-    import json  # json is used for saving the results of the disassembly
+    import simplejson as json  # json is used for saving the results of the disassembly
+    import tempfile
     import argparse  # programm arguments
+    import os  # needed for some filecontentcleaning
 except ImportError:
     sys.exit('Missing dependencies, please check readme.')
 
@@ -21,8 +23,8 @@ def get_hexdump_and_entrypoint_from_file(filename):
     return binascii.b2a_hex(pe.get_memory_mapped_image()), pe.OPTIONAL_HEADER.AddressOfEntryPoint
 
 
-def do_disassembly(address_ptr, dsm_queue, address_map, full_hexdump, functionname=None):
-    indirect_controlflows = 0  # +1 if problematic controlflows not yet handled
+def do_disassembly(address_ptr, dsm_queue, address_map, full_hexdump, res_file, functionname=None):
+    indirect_controlflows = 0  # +1 if problematic controlflow // not yet handled
 
     conditional_branch = ['jo', 'jno', 'jb', 'jnae', 'jc', 'jnb', 'jae', 'jnc', 'jz', 'je', 'jnz',
                           'jne', 'jbe', 'jna', 'jnbe', 'ja', 'js', 'jns', 'jp', 'jpe', 'jnp', 'jpo',
@@ -60,8 +62,8 @@ def do_disassembly(address_ptr, dsm_queue, address_map, full_hexdump, functionna
                         disassembled = hex(instruction.address) + ' ' + instruction.mnemonic + ' ' + instruction.op_str
                         basicblock.append(disassembled)
                         if len(basicblock) > 1:
-                            if basicblock[len(basicblock)-2].find("push ebp") > 0 \
-                                    and basicblock[len(basicblock)-1].find("mov ebp, esp") > 0:
+                            if basicblock[len(basicblock) - 2].find("push ebp") > 0 \
+                                    and basicblock[len(basicblock) - 1].find("mov ebp, esp") > 0:
                                 functionentries += 1
 
                         if instruction.mnemonic in unconditional_branch:
@@ -92,21 +94,18 @@ def do_disassembly(address_ptr, dsm_queue, address_map, full_hexdump, functionna
 
                         elif functionentries > 1:  # another function entry - "backtracing" does not check for lea's
                             inbasicblock = False
-                            del basicblock[len(basicblock)-2:len(basicblock)]
+                            del basicblock[len(basicblock) - 2:len(basicblock)]
 
                         else:
                             address_ptr += instruction.size
-
-        print(json.dumps({'name': 'function_'+hex(functionname),
-                          'basicblock_' + hex(startaddr): basicblock,
-                          'indirectcontrolflows': indirect_controlflows},  indent=2))
+        put_data_in_json_file(basicblock, hex(startaddr), hex(functionname), res_file)
 
 
 def get_string_pointer(address):
-    return address*2
+    return address * 2
 
 
-def worker(dsm_queue, address_map, full_hexdump):
+def worker(dsm_queue, address_map, full_hexdump, res_file):
     while True:
         queue_contents = dsm_queue.get()
         entry_point = queue_contents[0]
@@ -116,7 +115,7 @@ def worker(dsm_queue, address_map, full_hexdump):
         else:
             functionname = None
 
-        do_disassembly(entry_point, dsm_queue, address_map, full_hexdump, functionname)
+        do_disassembly(entry_point, dsm_queue, address_map, full_hexdump, res_file, functionname)
         dsm_queue.task_done()
 
 
@@ -126,12 +125,11 @@ def find_all(a_str, sub):
         start = a_str.find(sub, start)
         if start == -1:
             return
-        yield start/2
+        yield start / 2
         start += len(sub)
 
 
-def main():
-
+def parse_arguments():
     parser = argparse.ArgumentParser(description='Crossplatform commandline tool, written in Python, '
                                                  'which can disassemble 32bit PE files.')
     parser.add_argument('-filename', action="store", dest='pe_filename',
@@ -140,15 +138,60 @@ def main():
                         help='turn on hybrid processing (linear sweep + recursive traversal)')
     parser.add_argument('-threads', action="store", dest="num_threads", type=int, default=1,
                         help='set number of threads used for disassembly')
-    arguments = parser.parse_args()
+    parser.add_argument('-saveto', action='store', dest='res_filename', default='disassembled',
+                        help='set the name of the output JSON file')
+    return parser.parse_args()
 
+
+def get_res_file_handle(res_filename):
+    ending = '.json'
+    try:
+        res = open(res_filename + ending, 'w+')
+    except IOError:
+        sys.exit('IOError while accessing file ' + res_filename + ending + '.')
+    else:
+        return res
+
+
+def put_data_in_json_file(basicblock, basicblockaddress, functionaddress, filename):
+    functionname = 'func_' + functionaddress
+    basicblockname = 'basicblock_' + basicblockaddress
+
+    filecontent = json.load(filename)
+    filename.flush()
+    filename.seek(0)
+
+    # todo: check if function allready exists
+    # if filecontent.find(functionname) > 0:
+    # handle it
+
+    data = {functionname: [{basicblockname: basicblock}]}
+    filecontent.append(data)
+    json.dump(filecontent, filename)
+    filename.flush()
+    filename.seek(0)
+
+
+# def print_json_file_pretty(filename):
+    # add load stuff
+    # for op in filename[0]['func_0x001'][0]['basicblock_0x001']:
+    #    print(op)
+    # todo!
+
+def main():
+    arguments = parse_arguments()
     address_map = []  # saves already visited adresses
+
+    res_file = get_res_file_handle(arguments.res_filename)
+    json.dump([], res_file)
+    res_file.flush()
+    res_file.seek(0)
 
     dsm_queue = Queue.Queue()
     full_hexdump, first_entry_point = get_hexdump_and_entrypoint_from_file(arguments.pe_filename)
 
     for i in range(int(arguments.num_threads)):
-        t = threading.Thread(target=worker, args=(dsm_queue, address_map, full_hexdump))
+        t = threading.Thread(target=worker, args=(dsm_queue, address_map, full_hexdump, res_file))
         t.daemon = True
         t.start()
 
@@ -161,4 +204,8 @@ def main():
 
     dsm_queue.join()  # wait for all jobs to finish
 
+    # print_json_file_pretty(res_file)
+    print(json.load(res_file))
+
     print("Successfully disassembled " + str(len(address_map)) + " Basicblocks.")
+    res_file.close()
