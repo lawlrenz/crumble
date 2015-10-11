@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(
-    name="downbreaker",
+    name="crumble",
     version="0.1",
     author="Lorenz Heiler",
     author_email="contact@lorenzheiler.com",
@@ -14,9 +14,9 @@ setup(
     classifiers="",
 
     entry_points={
-        "console_scripts": ['downbreaker = downbreaker.downbreaker:main']
+        "console_scripts": ['crumble = crumble.crumble:main']
         },
-    packages=['downbreaker'],
+    packages=['crumble'],
 
     install_requires=[
         'pefile',

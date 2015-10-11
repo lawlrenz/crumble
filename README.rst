@@ -1,5 +1,5 @@
-Recursive Disassembler (x86)
-============================
+Crumble - A Recursive Disassembler (x86)
+========================================
 This is a crossplatform commandline tool, written in Python, which can disassemble 32bit PE files and save the results as a .json file.
 
 Incomplete features:
@@ -16,7 +16,7 @@ You can install this tool with ``$ pip install .``.
 
 Usage
 -----
-After installation you can run ``$ downbreaker -h`` for information about the arguments.
+After installation you can run ``$ crumble -h`` for information about the arguments.
 
 Additional Libraries used from PyPI
 -----------------------------------

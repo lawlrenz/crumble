@@ -130,16 +130,16 @@ def find_all(a_str, sub):
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description='Crossplatform commandline tool, written in Python, '
+    parser = argparse.ArgumentParser(description='Crumble - A crossplatform commandline tool, written in Python, '
                                                  'which can disassemble 32bit PE files.')
     parser.add_argument('-filename', action="store", dest='pe_filename',
-                        help='set the filename')
+                        help='set the filename of the PE file (e.g. filename.exe)')
     parser.add_argument('-hybrid', action="store_true", default=False,
-                        help='turn on hybrid processing (linear sweep + recursive traversal)')
+                        help='turn on hybrid processing (linear sweep for overall function detection + recursive traversal)')
     parser.add_argument('-threads', action="store", dest="num_threads", type=int, default=1,
-                        help='set number of threads used for disassembly')
+                        help='set number of threads used for disassembly (optional)')
     parser.add_argument('-saveto', action='store', dest='res_filename', default='disassembled',
-                        help='set the name of the output JSON file')
+                        help='set the name of the output JSON file (optional)')
     return parser.parse_args()
 
 

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
-from downbreaker.downbreaker import main
+from crumble.crumble import main
 
 
 if __name__ == '__main__':
