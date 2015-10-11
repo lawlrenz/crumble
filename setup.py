@@ -20,7 +20,7 @@ setup(
 
     install_requires=[
         'pefile',
-        'capstone',
+        'capstone'
     ],
 
 )

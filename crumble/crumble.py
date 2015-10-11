@@ -7,7 +7,7 @@ try:
     import threading  # threading module for some performance optimizations
     import binascii  # using for hexdump
     import sys
-    import simplejson as json  # json is used for saving the results of the disassembly
+    import json  # json is used for saving the results of the disassembly
     import argparse  # programm arguments
     import os.path
 
@@ -135,6 +135,15 @@ def find_all(a_str, sub):
         start += len(sub)
 
 
+def open_file(fullfilename):
+    try:
+        res = open(fullfilename, 'w+')
+    except IOError:
+        sys.exit('IOError while accessing file ' + fullfilename + '.')
+    else:
+        return res
+
+
 def get_res_file_handle(res_filename):
     fullfilename = res_filename + '.json'
     if os.path.isfile(fullfilename):
@@ -142,14 +151,13 @@ def get_res_file_handle(res_filename):
         if userinp == 'n' or userinp == 'N':
             sys.exit('Please choose a different filename and try again.')
         elif userinp == 'y' or userinp == 'Y' or userinp == '':
-            try:
-                res = open(fullfilename, 'w+')
-            except IOError:
-                sys.exit('IOError while accessing file ' + fullfilename + '.')
-            else:
-                return res
+            res = open_file(fullfilename)
         else:
             sys.exit('Unvalid userinput.')
+    else:
+        res = open_file(fullfilename)
+
+    return res
 
 
 def put_data_in_json_file(basicblock, basicblockaddress, functionaddress, filename):
@@ -206,6 +214,7 @@ def main():
     address_map = []  # saves already visited adresses
 
     res_file = get_res_file_handle(arguments.res_filename)
+    print(res_file)
     json.dump([], res_file)
     res_file.flush()
     res_file.seek(0)
