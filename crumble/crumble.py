@@ -214,7 +214,6 @@ def main():
     address_map = []  # saves already visited adresses
 
     res_file = get_res_file_handle(arguments.res_filename)
-    print(res_file)
     json.dump([], res_file)
     res_file.flush()
     res_file.seek(0)
