@@ -9,7 +9,7 @@ setup(
     author_email="contact@lorenzheiler.com",
     url="www.lorenzheiler.com",
 
-    description="Recursive Disassembler for PE files (x86) ",
+    description="Crumble - A Recursive Disassembler for PE files (x86) ",
     long_description="",
     classifiers="",
 

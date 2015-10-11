@@ -129,20 +129,6 @@ def find_all(a_str, sub):
         start += len(sub)
 
 
-def parse_arguments():
-    parser = argparse.ArgumentParser(description='Crumble - A crossplatform commandline tool, written in Python, '
-                                                 'which can disassemble 32bit PE files.')
-    parser.add_argument('-filename', action="store", dest='pe_filename',
-                        help='set the filename of the PE file (e.g. filename.exe)')
-    parser.add_argument('-hybrid', action="store_true", default=False,
-                        help='turn on hybrid processing (linear sweep for overall function detection + recursive traversal)')
-    parser.add_argument('-threads', action="store", dest="num_threads", type=int, default=1,
-                        help='set number of threads used for disassembly (optional)')
-    parser.add_argument('-saveto', action='store', dest='res_filename', default='disassembled',
-                        help='set the name of the output JSON file (optional)')
-    return parser.parse_args()
-
-
 def get_res_file_handle(res_filename):
     ending = '.json'
     try:
@@ -157,26 +143,48 @@ def put_data_in_json_file(basicblock, basicblockaddress, functionaddress, filena
     functionname = 'func_' + functionaddress
     basicblockname = 'basicblock_' + basicblockaddress
 
+    for i in range(len(basicblock)):  # remove adresses of instructions
+        basicblock[i] = basicblock[i].split(' ', 1)[1]
+
+    basicblockdict = {basicblockname: basicblock}
+
     filecontent = json.load(filename)
     filename.flush()
     filename.seek(0)
 
-    # todo: check if function allready exists
-    # if filecontent.find(functionname) > 0:
-    # handle it
+    done = False
+    for i in range(len(filecontent)):  # search for function entries
+        if functionname in filecontent[i]:
+            filecontent[i][functionname].append(basicblockdict)
+            done = True
 
-    data = {functionname: [{basicblockname: basicblock}]}
-    filecontent.append(data)
+    if not done:
+        filecontent.append({functionname: [basicblockdict]})
+
     json.dump(filecontent, filename)
     filename.flush()
     filename.seek(0)
 
 
-# def print_json_file_pretty(filename):
-    # add load stuff
-    # for op in filename[0]['func_0x001'][0]['basicblock_0x001']:
-    #    print(op)
-    # todo!
+def print_json_file_pretty(res_file):
+    parsed = json.load(res_file)
+    res_file.flush()
+    res_file.seek(0)
+    print(json.dumps(parsed, indent=2, sort_keys=True))
+
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='Crumble - A crossplatform commandline tool, written in Python, '
+                                                 'which can disassemble 32bit PE files.')
+    parser.add_argument('-filename', action="store", dest='pe_filename',
+                        help='set the filename of the PE file (e.g. filename.exe)')
+    parser.add_argument('-hybrid', action="store_true", default=False,
+                        help='turn on hybrid processing '
+                             '(linear sweep for overall function detection + recursive traversal)')
+    parser.add_argument('-saveto', action='store', dest='res_filename', default='disassembled',
+                        help='set the name of the output JSON file (optional)')
+    return parser.parse_args()
+
 
 def main():
     arguments = parse_arguments()
@@ -190,7 +198,7 @@ def main():
     dsm_queue = Queue.Queue()
     full_hexdump, first_entry_point = get_hexdump_and_entrypoint_from_file(arguments.pe_filename)
 
-    for i in range(int(arguments.num_threads)):
+    for i in range(1):  # more than one thread making trouble - no RW locks on output file
         t = threading.Thread(target=worker, args=(dsm_queue, address_map, full_hexdump, res_file))
         t.daemon = True
         t.start()
@@ -204,8 +212,7 @@ def main():
 
     dsm_queue.join()  # wait for all jobs to finish
 
-    # print_json_file_pretty(res_file)
-    print(json.load(res_file))
+    print_json_file_pretty(res_file)
 
     print("Successfully disassembled " + str(len(address_map)) + " Basicblocks.")
     res_file.close()
