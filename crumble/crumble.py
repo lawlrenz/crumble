@@ -8,9 +8,9 @@ try:
     import binascii  # using for hexdump
     import sys
     import simplejson as json  # json is used for saving the results of the disassembly
-    import tempfile
     import argparse  # programm arguments
-    import os  # needed for some filecontentcleaning
+    import os.path
+
 except ImportError:
     sys.exit('Missing dependencies, please check readme.')
 
@@ -20,7 +20,13 @@ def get_hexdump_and_entrypoint_from_file(filename):
         pe = pefile.PE(filename)
     except OSError:
         sys.exit('The file: ' + filename + ' could not be found.')
-    return binascii.b2a_hex(pe.get_memory_mapped_image()), pe.OPTIONAL_HEADER.AddressOfEntryPoint
+    except pefile.PEFormatError:
+        sys.exit('The file: ' + filename + ' is not a valid PE file.')
+
+    if hex(pe.OPTIONAL_HEADER.Magic) != '0x10b':
+        sys.exit('This tool is developed for 32bit PE files. The file ' + filename + ' is not a 32bit PE file.')
+    else:
+        return binascii.b2a_hex(pe.get_memory_mapped_image()), pe.OPTIONAL_HEADER.AddressOfEntryPoint
 
 
 def do_disassembly(address_ptr, dsm_queue, address_map, full_hexdump, res_file, functionname=None):
@@ -130,13 +136,20 @@ def find_all(a_str, sub):
 
 
 def get_res_file_handle(res_filename):
-    ending = '.json'
-    try:
-        res = open(res_filename + ending, 'w+')
-    except IOError:
-        sys.exit('IOError while accessing file ' + res_filename + ending + '.')
-    else:
-        return res
+    fullfilename = res_filename + '.json'
+    if os.path.isfile(fullfilename):
+        userinp = raw_input('File ' + fullfilename + ' does already exist. Overwrite? [Y/n]')
+        if userinp == 'n' or userinp == 'N':
+            sys.exit('Please choose a different filename and try again.')
+        elif userinp == 'y' or userinp == 'Y' or userinp == '':
+            try:
+                res = open(fullfilename, 'w+')
+            except IOError:
+                sys.exit('IOError while accessing file ' + fullfilename + '.')
+            else:
+                return res
+        else:
+            sys.exit('Unvalid userinput.')
 
 
 def put_data_in_json_file(basicblock, basicblockaddress, functionaddress, filename):
