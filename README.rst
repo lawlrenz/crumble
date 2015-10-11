@@ -1,11 +1,10 @@
 Crumble - A Recursive Disassembler (x86)
 ========================================
-This is a crossplatform commandline tool, written in Python, which can disassemble 32bit PE files and save the results as a .json file.
+This is a crossplatform commandline tool, written in Python, which disassembles 32bit PE files with recursive traversal and saves the results as a .json file.
 
 Incomplete features:
 --------------------
 * The results are far away from perfect (no indirect control flows)
-* Output as print on terminal only at the moment
 * Detecting functionnames from symboltables if given
 * Detecting strings
 * Detecting functionarguments

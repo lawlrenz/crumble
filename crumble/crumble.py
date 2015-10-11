@@ -183,6 +183,8 @@ def parse_arguments():
                              '(linear sweep for overall function detection + recursive traversal)')
     parser.add_argument('-saveto', action='store', dest='res_filename', default='disassembled',
                         help='set the name of the output JSON file (optional)')
+    parser.add_argument('-cprint', action="store_true", default=False,
+                        help='turn on console output')
     return parser.parse_args()
 
 
@@ -212,7 +214,8 @@ def main():
 
     dsm_queue.join()  # wait for all jobs to finish
 
-    print_json_file_pretty(res_file)
+    if arguments.cprint:
+        print_json_file_pretty(res_file)
 
-    print("Successfully disassembled " + str(len(address_map)) + " Basicblocks.")
+    print("Successfully disassembled " + arguments.pe_filename + " to " + arguments.res_filename + ".json.")
     res_file.close()
