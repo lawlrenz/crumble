@@ -16,6 +16,8 @@ except ImportError:
 
 
 def get_hexdump_and_entrypoint_from_file(filename):
+    if filename == '':
+        sys.exit('Please define a file, which you want to disassemble.')
     try:
         pe = pefile.PE(filename)
     except OSError:
@@ -182,7 +184,8 @@ def put_data_in_json_file(basicblock, basicblockaddress, functionaddress, filena
     if not done:
         filecontent.append({functionname: [basicblockdict]})
 
-    json.dump(filecontent, filename)
+    prettystring = json.dumps(filecontent, indent=2, sort_keys=True)
+    filename.write(prettystring)
     filename.flush()
     filename.seek(0)
 
@@ -191,13 +194,14 @@ def print_json_file_pretty(res_file):
     parsed = json.load(res_file)
     res_file.flush()
     res_file.seek(0)
-    print(json.dumps(parsed, indent=2, sort_keys=True))
+    prettystring = json.dumps(parsed, indent=2, sort_keys=True)
+    print(prettystring)
 
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Crumble - A crossplatform commandline tool, written in Python, '
                                                  'which can disassemble 32bit PE files.')
-    parser.add_argument('-filename', action="store", dest='pe_filename',
+    parser.add_argument('-filename', action="store", dest='pe_filename', default='',
                         help='set the filename of the PE file (e.g. filename.exe)')
     parser.add_argument('-hybrid', action="store_true", default=False,
                         help='turn on hybrid processing '
@@ -211,16 +215,15 @@ def parse_arguments():
 
 def main():
     arguments = parse_arguments()
+
+    full_hexdump, first_entry_point = get_hexdump_and_entrypoint_from_file(arguments.pe_filename)
     address_map = []  # saves already visited adresses
 
+    dsm_queue = Queue.Queue()
     res_file = get_res_file_handle(arguments.res_filename)
     json.dump([], res_file)
     res_file.flush()
     res_file.seek(0)
-
-    dsm_queue = Queue.Queue()
-    full_hexdump, first_entry_point = get_hexdump_and_entrypoint_from_file(arguments.pe_filename)
-
     for i in range(1):  # more than one thread making trouble - no RW locks on output file
         t = threading.Thread(target=worker, args=(dsm_queue, address_map, full_hexdump, res_file))
         t.daemon = True
