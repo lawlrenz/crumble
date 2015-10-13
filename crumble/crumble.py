@@ -106,7 +106,7 @@ def do_disassembly(address_ptr, dsm_queue, address_map, full_hexdump, res_file, 
 
                         else:
                             address_ptr += instruction.size
-        put_data_in_json_file(basicblock, hex(startaddr), hex(functionname), res_file)
+        put_data_in_json_file(basicblock, hex(startaddr), hex(functionname), res_file)  # slow. do as return value!
 
 
 def get_string_pointer(address):
@@ -198,6 +198,21 @@ def print_json_file_pretty(res_file):
     print(prettystring)
 
 
+def print_stats(res_file):
+    parsed = json.load(res_file)
+    res_file.flush()
+    res_file.seek(0)
+    num_funcs = 0
+    num_basicblocks = 0
+    for func in range(len(parsed)):  # rework maybe, doing the job though
+        num_funcs += 1
+        name = str(parsed[func].keys()[0])
+        for block in parsed[func][name]:
+            num_basicblocks += 1
+
+    print '%i functions and %i basicblocks detected.' % (num_funcs, num_basicblocks)
+
+
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Crumble - A crossplatform commandline tool, written in Python, '
                                                  'which can disassemble 32bit PE files.')
@@ -210,6 +225,8 @@ def parse_arguments():
                         help='set the name of the output JSON file (optional)')
     parser.add_argument('-cprint', action="store_true", default=False,
                         help='turn on console output')
+    parser.add_argument('-stats', action="store_true", default=False,
+                        help='prints amount of functions and basicblocks detected')
     return parser.parse_args()
 
 
@@ -241,5 +258,7 @@ def main():
     if arguments.cprint:
         print_json_file_pretty(res_file)
 
-    print("Successfully disassembled " + arguments.pe_filename + " to " + arguments.res_filename + ".json.")
+    if arguments.stats:
+        print_stats(res_file)
+    print("Successfully disassembled \'" + arguments.pe_filename + "\' to \'" + arguments.res_filename + ".json\'.")
     res_file.close()
