@@ -1,0 +1,647 @@
+[
+  {
+    "func_0x1210": [
+      {
+        "basicblock_0x1210": [
+          "push ebp", 
+          "mov ebp, esp", 
+          "sub esp, 0x14", 
+          "push 1", 
+          "call dword ptr [0x4050d4]", 
+          "call 0x1110", 
+          "lea esi, dword ptr [esi]", 
+          "lea edi, dword ptr [edi]"
+        ]
+      }
+    ]
+  }, 
+  {
+    "func_0x1110": [
+      {
+        "basicblock_0x1110": [
+          "push ebp", 
+          "mov ebp, esp", 
+          "push ebx", 
+          "sub esp, 0x20", 
+          "push 0x401000", 
+          "call 0x1960", 
+          "add esp, 0xc", 
+          "call 0x1360", 
+          "call 0x1480", 
+          "sub esp, 0xc", 
+          "lea eax, dword ptr [ebp - 8]", 
+          "mov dword ptr [ebp - 8], 0", 
+          "push eax", 
+          "lea eax, dword ptr [ebp - 0xc]", 
+          "mov ebx, dword ptr [0x402000]", 
+          "push ebx", 
+          "push eax", 
+          "push 0x404000", 
+          "push 0x404004", 
+          "call 0x18c0", 
+          "mov eax, dword ptr [0x404010]", 
+          "add esp, 0x20", 
+          "test eax, eax", 
+          "je 0x11b0"
+        ]
+      }, 
+      {
+        "basicblock_0x1162": [
+          "mov edx, dword ptr [0x4050e0]", 
+          "mov dword ptr [0x402010], eax", 
+          "test edx, edx", 
+          "jne 0x11f3"
+        ]
+      }, 
+      {
+        "basicblock_0x11b0": [
+          "call 0x18a0", 
+          "mov edx, dword ptr [0x402010]", 
+          "mov dword ptr [eax], edx", 
+          "call 0x1330", 
+          "and esp, 0xfffffff0", 
+          "sub esp, 0x10", 
+          "call 0x1880", 
+          "add esp, 0xc", 
+          "mov eax, dword ptr [eax]", 
+          "push eax", 
+          "mov eax, dword ptr [0x404000]", 
+          "push eax", 
+          "mov eax, dword ptr [0x404004]", 
+          "push eax", 
+          "call 0x1280", 
+          "mov ebx, eax", 
+          "call 0x1870", 
+          "mov dword ptr [esp], ebx", 
+          "call 0x1950", 
+          "push ecx", 
+          "push ecx", 
+          "push eax", 
+          "mov eax, dword ptr [edx + 0x10]", 
+          "push eax", 
+          "call 0x18b0", 
+          "add esp, 0x10", 
+          "mov edx, dword ptr [0x4050e0]", 
+          "jmp 0x1175"
+        ]
+      }, 
+      {
+        "basicblock_0x1175": [
+          "cmp edx, 0xe0", 
+          "je 0x1194"
+        ]
+      }, 
+      {
+        "basicblock_0x11f3": [
+          "push ecx", 
+          "push ecx", 
+          "push eax", 
+          "mov eax, dword ptr [edx + 0x10]", 
+          "push eax", 
+          "call 0x18b0", 
+          "add esp, 0x10", 
+          "mov edx, dword ptr [0x4050e0]", 
+          "jmp 0x1175"
+        ]
+      }, 
+      {
+        "basicblock_0x117a": [
+          "push eax", 
+          "push eax", 
+          "mov eax, dword ptr [0x404010]", 
+          "push eax", 
+          "mov eax, dword ptr [edx + 0x30]", 
+          "push eax", 
+          "call 0x18b0", 
+          "add esp, 0x10", 
+          "mov edx, dword ptr [0x4050e0]", 
+          "cmp edx, 0xc0", 
+          "je 0x11b0"
+        ]
+      }, 
+      {
+        "basicblock_0x1194": [
+          "cmp edx, 0xc0", 
+          "je 0x11b0"
+        ]
+      }, 
+      {
+        "basicblock_0x1199": [
+          "push ebx", 
+          "push ebx", 
+          "mov ecx, dword ptr [0x404010]", 
+          "push ecx", 
+          "mov eax, dword ptr [edx + 0x50]", 
+          "push eax", 
+          "call 0x18b0", 
+          "add esp, 0x10", 
+          "nop ", 
+          "call 0x18a0", 
+          "mov edx, dword ptr [0x402010]", 
+          "mov dword ptr [eax], edx", 
+          "call 0x1330", 
+          "and esp, 0xfffffff0", 
+          "sub esp, 0x10", 
+          "call 0x1880", 
+          "add esp, 0xc", 
+          "mov eax, dword ptr [eax]", 
+          "push eax", 
+          "mov eax, dword ptr [0x404000]", 
+          "push eax", 
+          "mov eax, dword ptr [0x404004]", 
+          "push eax", 
+          "call 0x1280", 
+          "mov ebx, eax", 
+          "call 0x1870", 
+          "mov dword ptr [esp], ebx", 
+          "call 0x1950", 
+          "push ecx", 
+          "push ecx", 
+          "push eax", 
+          "mov eax, dword ptr [edx + 0x10]", 
+          "push eax", 
+          "call 0x18b0", 
+          "add esp, 0x10", 
+          "mov edx, dword ptr [0x4050e0]", 
+          "jmp 0x1175"
+        ]
+      }
+    ]
+  }, 
+  {
+    "func_0x1960": [
+      {
+        "basicblock_0x1960": [
+          "jmp dword ptr [0x4050bc]"
+        ]
+      }
+    ]
+  }, 
+  {
+    "func_0x1360": [
+      {
+        "basicblock_0x1360": [
+          "push ebp", 
+          "mov ebp, esp", 
+          "push ebx", 
+          "pushfd ", 
+          "pushfd ", 
+          "pop eax", 
+          "mov ebx, eax", 
+          "xor eax, 0x200000", 
+          "push eax", 
+          "popfd ", 
+          "pushfd ", 
+          "pop eax", 
+          "popfd ", 
+          "xor eax, ebx", 
+          "test eax, 0x200000", 
+          "je 0x1458"
+        ]
+      }, 
+      {
+        "basicblock_0x1380": [
+          "xor eax, eax", 
+          "cpuid ", 
+          "test eax, eax", 
+          "je 0x1458"
+        ]
+      }, 
+      {
+        "basicblock_0x1458": [
+          "pop ebx", 
+          "pop ebp", 
+          "ret "
+        ]
+      }, 
+      {
+        "basicblock_0x138c": [
+          "mov eax, 1", 
+          "cpuid ", 
+          "test dh, 1", 
+          "jne 0x1460"
+        ]
+      }, 
+      {
+        "basicblock_0x139c": [
+          "test dx, dx", 
+          "jns 0x13ae"
+        ]
+      }, 
+      {
+        "basicblock_0x1460": [
+          "mov eax, dword ptr [0x404020]", 
+          "or eax, 1", 
+          "mov dword ptr [0x404020], eax", 
+          "jmp 0x139c"
+        ]
+      }, 
+      {
+        "basicblock_0x13a1": [
+          "mov eax, dword ptr [0x404020]", 
+          "or eax, 2", 
+          "mov dword ptr [0x404020], eax", 
+          "test edx, 0x800000", 
+          "je 0x13c3"
+        ]
+      }, 
+      {
+        "basicblock_0x13ae": [
+          "test edx, 0x800000", 
+          "je 0x13c3"
+        ]
+      }, 
+      {
+        "basicblock_0x13b6": [
+          "mov eax, dword ptr [0x404020]", 
+          "or eax, 4", 
+          "mov dword ptr [0x404020], eax", 
+          "test edx, 0x1000000", 
+          "je 0x13d8"
+        ]
+      }, 
+      {
+        "basicblock_0x13c3": [
+          "test edx, 0x1000000", 
+          "je 0x13d8"
+        ]
+      }, 
+      {
+        "basicblock_0x13cb": [
+          "mov eax, dword ptr [0x404020]", 
+          "or eax, 8", 
+          "mov dword ptr [0x404020], eax", 
+          "test edx, 0x2000000", 
+          "je 0x13ed"
+        ]
+      }, 
+      {
+        "basicblock_0x13d8": [
+          "test edx, 0x2000000", 
+          "je 0x13ed"
+        ]
+      }, 
+      {
+        "basicblock_0x13e0": [
+          "mov eax, dword ptr [0x404020]", 
+          "or eax, 0x10", 
+          "mov dword ptr [0x404020], eax", 
+          "and edx, 0x4000000", 
+          "je 0x1404"
+        ]
+      }, 
+      {
+        "basicblock_0x13ed": [
+          "and edx, 0x4000000", 
+          "je 0x1404"
+        ]
+      }, 
+      {
+        "basicblock_0x13f5": [
+          "mov ebx, dword ptr [0x404020]", 
+          "or ebx, 0x20", 
+          "mov dword ptr [0x404020], ebx", 
+          "test cl, 1", 
+          "je 0x1418"
+        ]
+      }, 
+      {
+        "basicblock_0x1404": [
+          "test cl, 1", 
+          "je 0x1418"
+        ]
+      }, 
+      {
+        "basicblock_0x1409": [
+          "mov edx, dword ptr [0x404020]", 
+          "or edx, 0x40", 
+          "mov dword ptr [0x404020], edx", 
+          "and ch, 0x20", 
+          "je 0x1429"
+        ]
+      }, 
+      {
+        "basicblock_0x1418": [
+          "and ch, 0x20", 
+          "je 0x1429"
+        ]
+      }, 
+      {
+        "basicblock_0x141d": [
+          "mov eax, dword ptr [0x404020]", 
+          "or al, 0x80", 
+          "mov dword ptr [0x404020], eax", 
+          "mov eax, 0x80000000", 
+          "cpuid ", 
+          "cmp eax, 0x80000000", 
+          "jbe 0x1458"
+        ]
+      }, 
+      {
+        "basicblock_0x1429": [
+          "mov eax, 0x80000000", 
+          "cpuid ", 
+          "cmp eax, 0x80000000", 
+          "jbe 0x1458"
+        ]
+      }, 
+      {
+        "basicblock_0x1437": [
+          "mov eax, 0x80000001", 
+          "cpuid ", 
+          "mov eax, dword ptr [0x404020]", 
+          "mov ecx, eax", 
+          "or ch, 1", 
+          "and edx, 0x40000000", 
+          "je 0x1472"
+        ]
+      }, 
+      {
+        "basicblock_0x1450": [
+          "or ah, 3", 
+          "mov dword ptr [0x404020], eax", 
+          "pop ebx", 
+          "pop ebp", 
+          "ret "
+        ]
+      }, 
+      {
+        "basicblock_0x1472": [
+          "pop ebx", 
+          "mov dword ptr [0x404020], ecx", 
+          "pop ebp", 
+          "ret "
+        ]
+      }
+    ]
+  }, 
+  {
+    "func_0x1480": [
+      {
+        "basicblock_0x1480": [
+          "push ebp", 
+          "mov ebp, esp", 
+          "fninit ", 
+          "pop ebp", 
+          "ret "
+        ]
+      }
+    ]
+  }, 
+  {
+    "func_0x18c0": [
+      {
+        "basicblock_0x18c0": [
+          "jmp dword ptr [0x4050c8]"
+        ]
+      }
+    ]
+  }, 
+  {
+    "func_0x18a0": [
+      {
+        "basicblock_0x18a0": [
+          "jmp dword ptr [0x4050d0]"
+        ]
+      }
+    ]
+  }, 
+  {
+    "func_0x1330": [
+      {
+        "basicblock_0x1330": [
+          "push ebp", 
+          "mov ecx, 0x403190", 
+          "mov ebp, esp", 
+          "jmp 0x134e"
+        ]
+      }, 
+      {
+        "basicblock_0x134e": [
+          "cmp ecx, 0x403190", 
+          "jb 0x1340"
+        ]
+      }, 
+      {
+        "basicblock_0x1356": [
+          "pop ebp", 
+          "ret "
+        ]
+      }, 
+      {
+        "basicblock_0x1340": [
+          "mov edx, dword ptr [ecx + 4]", 
+          "mov eax, dword ptr [ecx]", 
+          "add ecx, 8", 
+          "add dword ptr [edx + 0x400000], eax", 
+          "cmp ecx, 0x403190", 
+          "jb 0x1340"
+        ]
+      }
+    ]
+  }, 
+  {
+    "func_0x1880": [
+      {
+        "basicblock_0x1880": [
+          "jmp dword ptr [0x4050cc]"
+        ]
+      }
+    ]
+  }, 
+  {
+    "func_0x1280": [
+      {
+        "basicblock_0x1280": [
+          "push ebp", 
+          "mov ebp, esp", 
+          "sub esp, 8", 
+          "and esp, 0xfffffff0", 
+          "mov eax, 0", 
+          "add eax, 0xf", 
+          "add eax, 0xf", 
+          "shr eax, 4", 
+          "shl eax, 4", 
+          "mov dword ptr [ebp - 8], eax", 
+          "mov eax, dword ptr [ebp - 8]", 
+          "call 0x1840", 
+          "call 0x1510", 
+          "cmp dword ptr [ebp + 8], 2", 
+          "je 0x12d2"
+        ]
+      }, 
+      {
+        "basicblock_0x12b0": [
+          "sub esp, 8", 
+          "push 0x403000", 
+          "mov eax, dword ptr [0x4050e0]", 
+          "add eax, 0x40", 
+          "push eax", 
+          "call 0x18f0", 
+          "add esp, 0x10", 
+          "mov dword ptr [ebp - 4], 1", 
+          "jmp 0x1327"
+        ]
+      }, 
+      {
+        "basicblock_0x12d2": [
+          "mov eax, dword ptr [ebp + 0xc]", 
+          "add eax, 4", 
+          "sub esp, 8", 
+          "push 0x403024", 
+          "push dword ptr [eax]", 
+          "call 0x18e0", 
+          "add esp, 0x10", 
+          "test eax, eax", 
+          "je 0x1310"
+        ]
+      }, 
+      {
+        "basicblock_0x1327": [
+          "mov eax, dword ptr [ebp - 4]", 
+          "leave ", 
+          "ret "
+        ]
+      }, 
+      {
+        "basicblock_0x12ee": [
+          "sub esp, 8", 
+          "push 0x403036", 
+          "mov eax, dword ptr [0x4050e0]", 
+          "add eax, 0x40", 
+          "push eax", 
+          "call 0x18f0", 
+          "add esp, 0x10", 
+          "mov dword ptr [ebp - 4], 2", 
+          "jmp 0x1327"
+        ]
+      }, 
+      {
+        "basicblock_0x1310": [
+          "sub esp, 0xc", 
+          "push 0x403054", 
+          "call 0x18d0", 
+          "add esp, 0x10", 
+          "mov dword ptr [ebp - 4], 0", 
+          "mov eax, dword ptr [ebp - 4]", 
+          "leave ", 
+          "ret "
+        ]
+      }
+    ]
+  }, 
+  {
+    "func_0x1870": [
+      {
+        "basicblock_0x1870": [
+          "jmp dword ptr [0x4050dc]"
+        ]
+      }
+    ]
+  }, 
+  {
+    "func_0x1950": [
+      {
+        "basicblock_0x1950": [
+          "jmp dword ptr [0x4050b0]"
+        ]
+      }
+    ]
+  }, 
+  {
+    "func_0x18b0": [
+      {
+        "basicblock_0x18b0": [
+          "jmp dword ptr [0x4050e8]"
+        ]
+      }
+    ]
+  }, 
+  {
+    "func_0x1840": [
+      {
+        "basicblock_0x1840": [
+          "push ecx", 
+          "mov ecx, esp", 
+          "add ecx, 8", 
+          "cmp eax, 0x1000", 
+          "jb 0x185d"
+        ]
+      }, 
+      {
+        "basicblock_0x184d": [
+          "sub ecx, 0x1000", 
+          "or dword ptr [ecx], 0", 
+          "sub eax, 0x1000", 
+          "jmp 0x1846"
+        ]
+      }, 
+      {
+        "basicblock_0x185d": [
+          "sub ecx, eax", 
+          "or dword ptr [ecx], 0", 
+          "mov eax, esp", 
+          "mov esp, ecx", 
+          "mov ecx, dword ptr [eax]", 
+          "mov eax, dword ptr [eax + 4]", 
+          "jmp eax"
+        ]
+      }, 
+      {
+        "basicblock_0x1846": [
+          "cmp eax, 0x1000", 
+          "jb 0x185d"
+        ]
+      }
+    ]
+  }, 
+  {
+    "func_0x1510": [
+      {
+        "basicblock_0x1510": [
+          "push ebp", 
+          "mov eax, dword ptr [0x404030]", 
+          "mov ebp, esp", 
+          "test eax, eax", 
+          "je 0x1520"
+        ]
+      }, 
+      {
+        "basicblock_0x151c": [
+          "pop ebp", 
+          "ret "
+        ]
+      }, 
+      {
+        "basicblock_0x1520": []
+      }
+    ]
+  }, 
+  {
+    "func_0x18f0": [
+      {
+        "basicblock_0x18f0": [
+          "jmp dword ptr [0x4050f4]"
+        ]
+      }
+    ]
+  }, 
+  {
+    "func_0x18e0": [
+      {
+        "basicblock_0x18e0": [
+          "jmp dword ptr [0x40510c]"
+        ]
+      }
+    ]
+  }, 
+  {
+    "func_0x18d0": [
+      {
+        "basicblock_0x18d0": [
+          "jmp dword ptr [0x405104]"
+        ]
+      }
+    ]
+  }
+]

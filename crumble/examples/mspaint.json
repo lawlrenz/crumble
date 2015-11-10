@@ -1,0 +1,449 @@
+[
+  {
+    "func_0x34bbf": [
+      {
+        "basicblock_0x34bbf": [
+          "push 0x70", 
+          "push 0x1007400", 
+          "call 0x34fdc", 
+          "xor edi, edi", 
+          "push edi", 
+          "call dword ptr [0x10011b0]", 
+          "cmp word ptr [eax], 0x5a4d", 
+          "jne 0x34bfa"
+        ]
+      }, 
+      {
+        "basicblock_0x34bdb": [
+          "mov ecx, dword ptr [eax + 0x3c]", 
+          "add ecx, eax", 
+          "cmp dword ptr [ecx], 0x4550", 
+          "jne 0x34bfa"
+        ]
+      }, 
+      {
+        "basicblock_0x34bfa": [
+          "mov dword ptr [ebp - 0x1c], edi", 
+          "jmp 0x34c26"
+        ]
+      }, 
+      {
+        "basicblock_0x34be8": [
+          "movzx eax, word ptr [ecx + 0x18]", 
+          "cmp eax, 0x10b", 
+          "je 0x34c12"
+        ]
+      }, 
+      {
+        "basicblock_0x34c26": [
+          "mov dword ptr [ebp - 4], edi", 
+          "push 2", 
+          "pop ebx", 
+          "push ebx", 
+          "call dword ptr [0x1001e44]", 
+          "pop ecx", 
+          "or dword ptr [0x103f47c], 0xffffffff", 
+          "or dword ptr [0x103f480], 0xffffffff", 
+          "call dword ptr [0x1001e40]", 
+          "mov ecx, dword ptr [0x103f44c]", 
+          "mov dword ptr [eax], ecx", 
+          "call dword ptr [0x1001e3c]", 
+          "mov ecx, dword ptr [0x103f448]", 
+          "mov dword ptr [eax], ecx", 
+          "mov eax, dword ptr [0x1001e38]", 
+          "mov eax, dword ptr [eax]", 
+          "mov dword ptr [0x103f478], eax", 
+          "call 0x350b0", 
+          "cmp dword ptr [0x103e6c0], edi", 
+          "jne 0x34c83"
+        ]
+      }, 
+      {
+        "basicblock_0x34bf3": [
+          "cmp eax, 0x20b", 
+          "je 0x34bff"
+        ]
+      }, 
+      {
+        "basicblock_0x34c12": [
+          "cmp dword ptr [ecx + 0x74], 0xe", 
+          "jbe 0x34bfa"
+        ]
+      }, 
+      {
+        "basicblock_0x34c77": [
+          "push 0x10350b0", 
+          "call dword ptr [0x1001e08]", 
+          "pop ecx", 
+          "call 0x35099", 
+          "push 0x103d0a8", 
+          "push 0x103d0a4", 
+          "call 0x3508e", 
+          "mov eax, dword ptr [0x103f444]", 
+          "mov dword ptr [ebp - 0x24], eax", 
+          "lea eax, dword ptr [ebp - 0x24]", 
+          "push eax", 
+          "push dword ptr [0x103f440]", 
+          "lea eax, dword ptr [ebp - 0x2c]", 
+          "push eax", 
+          "lea eax, dword ptr [ebp - 0x30]", 
+          "push eax", 
+          "lea eax, dword ptr [ebp - 0x34]", 
+          "push eax", 
+          "call dword ptr [0x1001e00]", 
+          "mov dword ptr [ebp - 0x38], eax", 
+          "push 0x103d0a0", 
+          "push 0x103d000", 
+          "call 0x3508e", 
+          "add esp, 0x24", 
+          "mov eax, dword ptr [0x1001dfc]", 
+          "mov esi, dword ptr [eax]", 
+          "cmp esi, edi", 
+          "jne 0x34ce9"
+        ]
+      }, 
+      {
+        "basicblock_0x34c83": [
+          "call 0x35099", 
+          "push 0x103d0a8", 
+          "push 0x103d0a4", 
+          "call 0x3508e", 
+          "mov eax, dword ptr [0x103f444]", 
+          "mov dword ptr [ebp - 0x24], eax", 
+          "lea eax, dword ptr [ebp - 0x24]", 
+          "push eax", 
+          "push dword ptr [0x103f440]", 
+          "lea eax, dword ptr [ebp - 0x2c]", 
+          "push eax", 
+          "lea eax, dword ptr [ebp - 0x30]", 
+          "push eax", 
+          "lea eax, dword ptr [ebp - 0x34]", 
+          "push eax", 
+          "call dword ptr [0x1001e00]", 
+          "mov dword ptr [ebp - 0x38], eax", 
+          "push 0x103d0a0", 
+          "push 0x103d000", 
+          "call 0x3508e", 
+          "add esp, 0x24", 
+          "mov eax, dword ptr [0x1001dfc]", 
+          "mov esi, dword ptr [eax]", 
+          "cmp esi, edi", 
+          "jne 0x34ce9"
+        ]
+      }, 
+      {
+        "basicblock_0x34bff": [
+          "cmp dword ptr [ecx + 0x84], 0xe", 
+          "jbe 0x34bfa"
+        ]
+      }, 
+      {
+        "basicblock_0x34c18": [
+          "xor eax, eax", 
+          "cmp dword ptr [ecx + 0xe8], edi", 
+          "setne al", 
+          "mov dword ptr [ebp - 0x1c], eax", 
+          "mov dword ptr [ebp - 4], edi", 
+          "push 2", 
+          "pop ebx", 
+          "push ebx", 
+          "call dword ptr [0x1001e44]", 
+          "pop ecx", 
+          "or dword ptr [0x103f47c], 0xffffffff", 
+          "or dword ptr [0x103f480], 0xffffffff", 
+          "call dword ptr [0x1001e40]", 
+          "mov ecx, dword ptr [0x103f44c]", 
+          "mov dword ptr [eax], ecx", 
+          "call dword ptr [0x1001e3c]", 
+          "mov ecx, dword ptr [0x103f448]", 
+          "mov dword ptr [eax], ecx", 
+          "mov eax, dword ptr [0x1001e38]", 
+          "mov eax, dword ptr [eax]", 
+          "mov dword ptr [0x103f478], eax", 
+          "call 0x350b0", 
+          "cmp dword ptr [0x103e6c0], edi", 
+          "jne 0x34c83"
+        ]
+      }, 
+      {
+        "basicblock_0x34cdb": [
+          "or dword ptr [ebp - 4], 0xffffffff", 
+          "mov eax, 0xff", 
+          "jmp 0x34da3"
+        ]
+      }, 
+      {
+        "basicblock_0x34ce9": [
+          "mov dword ptr [ebp - 0x20], esi", 
+          "cmp word ptr [esi], 0x22", 
+          "jne 0x34d37"
+        ]
+      }, 
+      {
+        "basicblock_0x34c08": [
+          "xor eax, eax", 
+          "cmp dword ptr [ecx + 0xf8], edi", 
+          "jmp 0x34c20"
+        ]
+      }, 
+      {
+        "basicblock_0x34da3": [
+          "call 0x35017", 
+          "ret "
+        ]
+      }, 
+      {
+        "basicblock_0x34cf2": [
+          "add esi, ebx", 
+          "mov dword ptr [ebp - 0x20], esi", 
+          "mov ax, word ptr [esi]", 
+          "cmp ax, di", 
+          "je 0x34d05"
+        ]
+      }, 
+      {
+        "basicblock_0x34d37": [
+          "cmp word ptr [esi], 0x20", 
+          "jbe 0x34d10"
+        ]
+      }, 
+      {
+        "basicblock_0x34c20": [
+          "setne al", 
+          "mov dword ptr [ebp - 0x1c], eax", 
+          "mov dword ptr [ebp - 4], edi", 
+          "push 2", 
+          "pop ebx", 
+          "push ebx", 
+          "call dword ptr [0x1001e44]", 
+          "pop ecx", 
+          "or dword ptr [0x103f47c], 0xffffffff", 
+          "or dword ptr [0x103f480], 0xffffffff", 
+          "call dword ptr [0x1001e40]", 
+          "mov ecx, dword ptr [0x103f44c]", 
+          "mov dword ptr [eax], ecx", 
+          "call dword ptr [0x1001e3c]", 
+          "mov ecx, dword ptr [0x103f448]", 
+          "mov dword ptr [eax], ecx", 
+          "mov eax, dword ptr [0x1001e38]", 
+          "mov eax, dword ptr [eax]", 
+          "mov dword ptr [0x103f478], eax", 
+          "call 0x350b0", 
+          "cmp dword ptr [0x103e6c0], edi", 
+          "jne 0x34c83"
+        ]
+      }, 
+      {
+        "basicblock_0x34cff": [
+          "cmp ax, 0x22", 
+          "jne 0x34cf2"
+        ]
+      }, 
+      {
+        "basicblock_0x34d05": [
+          "cmp word ptr [esi], 0x22", 
+          "jne 0x34d10"
+        ]
+      }, 
+      {
+        "basicblock_0x34d3d": [
+          "add esi, ebx", 
+          "mov dword ptr [ebp - 0x20], esi", 
+          "jmp 0x34d37"
+        ]
+      }, 
+      {
+        "basicblock_0x34d10": [
+          "mov ax, word ptr [esi]", 
+          "cmp ax, di", 
+          "je 0x34d1e"
+        ]
+      }, 
+      {
+        "basicblock_0x34d0b": [
+          "add esi, ebx", 
+          "mov dword ptr [ebp - 0x20], esi", 
+          "mov ax, word ptr [esi]", 
+          "cmp ax, di", 
+          "je 0x34d1e"
+        ]
+      }, 
+      {
+        "basicblock_0x34d18": [
+          "cmp ax, 0x20", 
+          "jbe 0x34d0b"
+        ]
+      }, 
+      {
+        "basicblock_0x34d1e": [
+          "mov dword ptr [ebp - 0x54], edi", 
+          "lea eax, dword ptr [ebp - 0x80]", 
+          "push eax", 
+          "call dword ptr [0x1001270]", 
+          "test byte ptr [ebp - 0x54], 1", 
+          "je 0x34d44"
+        ]
+      }, 
+      {
+        "basicblock_0x34d31": [
+          "movzx eax, word ptr [ebp - 0x50]", 
+          "jmp 0x34d47"
+        ]
+      }, 
+      {
+        "basicblock_0x34d44": [
+          "push 0xa", 
+          "pop eax", 
+          "push eax", 
+          "push esi", 
+          "push edi", 
+          "push edi", 
+          "call dword ptr [0x10011b0]", 
+          "push eax", 
+          "call 0x3570e", 
+          "mov esi, eax", 
+          "mov dword ptr [ebp - 0x3c], esi", 
+          "cmp dword ptr [ebp - 0x1c], edi", 
+          "jne 0x34d68"
+        ]
+      }, 
+      {
+        "basicblock_0x34d47": [
+          "push eax", 
+          "push esi", 
+          "push edi", 
+          "push edi", 
+          "call dword ptr [0x10011b0]", 
+          "push eax", 
+          "call 0x3570e", 
+          "mov esi, eax", 
+          "mov dword ptr [ebp - 0x3c], esi", 
+          "cmp dword ptr [ebp - 0x1c], edi", 
+          "jne 0x34d68"
+        ]
+      }, 
+      {
+        "basicblock_0x34d61": [
+          "push esi", 
+          "call dword ptr [0x1001df8]", 
+          "call dword ptr [0x1001df4]", 
+          "jmp 0x34d9d"
+        ]
+      }, 
+      {
+        "basicblock_0x34d68": [
+          "call dword ptr [0x1001df4]", 
+          "jmp 0x34d9d"
+        ]
+      }, 
+      {
+        "basicblock_0x34d9d": [
+          "or dword ptr [ebp - 4], 0xffffffff", 
+          "mov eax, esi", 
+          "call 0x35017", 
+          "ret "
+        ]
+      }
+    ]
+  }, 
+  {
+    "func_0x34fdc": [
+      {
+        "basicblock_0x34fdc": [
+          "push 0x103502e", 
+          "mov eax, dword ptr fs:[0]", 
+          "push eax", 
+          "mov eax, dword ptr [esp + 0x10]", 
+          "mov dword ptr [esp + 0x10], ebp", 
+          "lea ebp, dword ptr [esp + 0x10]", 
+          "sub esp, eax", 
+          "push ebx", 
+          "push esi", 
+          "push edi", 
+          "mov eax, dword ptr [ebp - 8]", 
+          "mov dword ptr [ebp - 0x18], esp", 
+          "push eax", 
+          "mov eax, dword ptr [ebp - 4]", 
+          "mov dword ptr [ebp - 4], 0xffffffff", 
+          "mov dword ptr [ebp - 8], eax", 
+          "lea eax, dword ptr [ebp - 0x10]", 
+          "mov dword ptr fs:[0], eax", 
+          "ret "
+        ]
+      }
+    ]
+  }, 
+  {
+    "func_0x350b0": [
+      {
+        "basicblock_0x350b0": [
+          "xor eax, eax", 
+          "ret "
+        ]
+      }
+    ]
+  }, 
+  {
+    "func_0x35099": [
+      {
+        "basicblock_0x35099": [
+          "push 0x30000", 
+          "push 0x10000", 
+          "call 0x350dc", 
+          "pop ecx", 
+          "pop ecx", 
+          "ret "
+        ]
+      }
+    ]
+  }, 
+  {
+    "func_0x3508e": [
+      {
+        "basicblock_0x3508e": [
+          "jmp dword ptr [0x1001e04]"
+        ]
+      }
+    ]
+  }, 
+  {
+    "func_0x350dc": [
+      {
+        "basicblock_0x350dc": [
+          "jmp dword ptr [0x1001e0c]"
+        ]
+      }
+    ]
+  }, 
+  {
+    "func_0x35017": [
+      {
+        "basicblock_0x35017": [
+          "mov ecx, dword ptr [ebp - 0x10]", 
+          "mov dword ptr fs:[0], ecx", 
+          "pop ecx", 
+          "pop edi", 
+          "pop esi", 
+          "pop ebx", 
+          "leave ", 
+          "push ecx", 
+          "ret "
+        ]
+      }
+    ]
+  }, 
+  {
+    "func_0x3570e": [
+      {
+        "basicblock_0x3570e": [
+          "jmp 0x3573a"
+        ]
+      }, 
+      {
+        "basicblock_0x3573a": [
+          "jmp dword ptr [0x10019a0]"
+        ]
+      }
+    ]
+  }
+]
